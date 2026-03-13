@@ -224,8 +224,8 @@
             <div class="flex justify-between items-center h-20">
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="flex items-center group">
-                    <img src="{{ asset('assets/logo_white.jpeg') }}" alt="Diblong"
-                         class="h-10 rounded transition-transform duration-300 group-hover:scale-105">
+                    <img src="{{ asset('assets/logo_black.jpeg') }}" alt="Diblong"
+                         class="h-14 rounded transition-transform duration-300 group-hover:scale-105">
                 </a>
 
                 {{-- Desktop menu --}}
@@ -316,7 +316,7 @@
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                 <div>
-                    <img src="{{ asset('assets/logo_white.jpeg') }}" alt="Diblong" class="h-12 mb-5 rounded">
+                    <img src="{{ asset('assets/logo_black.jpeg') }}" alt="Diblong" class="h-12 mb-5 rounded">
                     <p class="text-gray-500 text-sm leading-relaxed">
                         Doğanın gücünü bilimsel yöntemlerle birleştirerek, en kaliteli bitkisel destek ürünlerini sunuyoruz.
                     </p>
