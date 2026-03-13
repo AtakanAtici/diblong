@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -25,8 +26,18 @@ class AdminController extends Controller
             'password' => 'required',
         ]);
 
-        if ($request->email === 'admin@diblong.com' && $request->password === 'diblong2026') {
-            session(['admin_logged_in' => true]);
+        $admin = DB::table('admins')
+            ->where('email', $request->email)
+            ->where('is_active', true)
+            ->first();
+
+        if ($admin && Hash::check($request->password, $admin->password)) {
+            session([
+                'admin_logged_in' => true,
+                'admin_id' => $admin->id,
+                'admin_name' => $admin->name,
+                'admin_role' => $admin->role,
+            ]);
             return redirect()->route('admin.dashboard');
         }
 
@@ -35,7 +46,7 @@ class AdminController extends Controller
 
     public function logout()
     {
-        session()->forget('admin_logged_in');
+        session()->forget(['admin_logged_in', 'admin_id', 'admin_name', 'admin_role']);
         return redirect()->route('admin.login');
     }
 
@@ -228,5 +239,82 @@ class AdminController extends Controller
     {
         DB::table('contact_messages')->where('id', $id)->delete();
         return redirect()->route('admin.messages')->with('success', 'Mesaj silindi!');
+    }
+
+    // --- Users ---
+
+    public function users()
+    {
+        $users = DB::table('admins')->latest()->get();
+        return view('admin.users', compact('users'));
+    }
+
+    public function createUser()
+    {
+        return view('admin.user-form', ['user' => null]);
+    }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:admins,email',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|in:admin,superadmin',
+        ]);
+
+        DB::table('admins')->insert([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'is_active' => $request->has('is_active'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.users')->with('success', 'Kullanıcı eklendi!');
+    }
+
+    public function editUser($id)
+    {
+        $user = DB::table('admins')->where('id', $id)->firstOrFail();
+        return view('admin.user-form', compact('user'));
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:admins,email,' . $id,
+            'password' => 'nullable|string|min:6|confirmed',
+            'role' => 'required|in:admin,superadmin',
+        ]);
+
+        $updateData = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'is_active' => $request->has('is_active'),
+            'updated_at' => now(),
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        DB::table('admins')->where('id', $id)->update($updateData);
+
+        return redirect()->route('admin.users')->with('success', 'Kullanıcı güncellendi!');
+    }
+
+    public function deleteUser($id)
+    {
+        if ($id == session('admin_id')) {
+            return back()->with('error', 'Kendi hesabınızı silemezsiniz!');
+        }
+
+        DB::table('admins')->where('id', $id)->delete();
+        return redirect()->route('admin.users')->with('success', 'Kullanıcı silindi!');
     }
 }

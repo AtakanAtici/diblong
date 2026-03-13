@@ -48,4 +48,10 @@ Route::middleware(AdminAuth::class)->prefix('admin')->name('admin.')->group(func
     Route::get('/mesajlar', [AdminController::class, 'messages'])->name('messages');
     Route::get('/mesajlar/{id}', [AdminController::class, 'messageDetail'])->name('message.detail');
     Route::delete('/mesajlar/{id}', [AdminController::class, 'deleteMessage'])->name('message.delete');
+    Route::get('/kullanicilar', [AdminController::class, 'users'])->name('users');
+    Route::get('/kullanicilar/ekle', [AdminController::class, 'createUser'])->name('user.create');
+    Route::post('/kullanicilar', [AdminController::class, 'storeUser'])->name('user.store');
+    Route::get('/kullanicilar/{id}/duzenle', [AdminController::class, 'editUser'])->name('user.edit');
+    Route::put('/kullanicilar/{id}', [AdminController::class, 'updateUser'])->name('user.update');
+    Route::delete('/kullanicilar/{id}', [AdminController::class, 'deleteUser'])->name('user.delete');
 });
